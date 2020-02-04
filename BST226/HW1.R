@@ -21,7 +21,7 @@ tapply(salary$sal, salary$sex, mean)
 fit <- lm(sal ~ sex, data=salary)
 summary(fit)
 
-#Q4
+#Q5
 salary$rank2 = 0
 salary$rank3 = 0
 salary$rank2[which(salary$rank == 2)] = 1
@@ -29,3 +29,14 @@ salary$rank3[which(salary$rank == 3)] = 1
 
 fit2 <- lm(sal~ sex+rank2+rank3+years,data=salary)
 summary(fit2)
+
+
+#Q8
+salary$years_2 <- salary$years^2
+fit3 <- lm(sal~ sex+rank2+rank3+years+years_2,data=salary)
+summary(fit3)
+
+#Q9
+sal_1 <- salary %>% filter(rank==1)
+fit4 <- lm(sal~ sex+years,data=sal_1)
+summary(fit4)
