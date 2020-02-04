@@ -37,6 +37,8 @@ fit3 <- lm(sal~ sex+rank2+rank3+years+years_2,data=salary)
 summary(fit3)
 
 #Q9
-sal_1 <- salary %>% filter(rank==1)
-fit4 <- lm(sal~ sex+years,data=sal_1)
+#sal_1 <- salary %>% filter(rank==1)
+#fit4 <- lm(sal~ sex+years,data=sal_1)
+#summary(fit4)
+fit4 <- lm(sal~ sex*years+rank2+rank3,data = salary)
 summary(fit4)
