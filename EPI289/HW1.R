@@ -2,10 +2,18 @@ hw1 <- read.csv("C:/Users/keiko/Dropbox/2020/spring/EPI289/hmwk1.csv")
 
 model <- glm(death~smk, data=hw1,family=binomial)
 summary(model)
+#add link logit
+model <- glm(death~smk, data=hw1,family=binomial(link="logit"))
+summary(model)
+
+exp(model$coefficients)
+exp(confint.default(model))
 
 
 model <- glm(death~smk *drink, data=hw1,family=binomial)
 summary(model)
+#wecan write smk + drink +smk:drink
+#* includes all possible combination of the ccovariates
 
 model <- glm(death~smk + overwt, data=hw1,family=binomial)
 summary(model)
@@ -19,7 +27,8 @@ data$age2 <- data$age^2
 model <- glm(death~qsmk + sex + race +age +age2, data=data,family=binomial)
 summary(model)
 exp(cbind(OR = coef(model), confint(model)))
-
+#or I can write +I(age*age) for quadratic term
+#"I" tells R we are using new terms 
 
 data$smokeyrs2 <- data$smokeyrs^2
 
