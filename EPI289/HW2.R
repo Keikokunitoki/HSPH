@@ -30,9 +30,14 @@ exp(confint.default(fit.ps.cont))
 
 nhefs.nd$age50 <- ifelse(nhefs.nd$age>50, 1, 0)
 
-prop.table(table(nhefs.nd$sex, nhefs.nd$age50, nhefs.nd$race))
 
-nrow(nhefs.nd[nhefs.nd$age50==0 & nhefs.nd$sex==0 & nhefs.nd$race==0])
+prop.table(table(nhefs.nd$sex, nhefs.nd$age50 ))
+prop.table(table(nhefs.nd$sex, nhefs.nd$age50 ,nhefs.nd$race))
+
+nrow(nhefs.nd[nhefs.nd$age50==0 & nhefs.nd$sex==0 & nhefs.nd$race==0,])/nrow(nhefs.nd)
+nrow(nhefs.nd[nhefs.nd$age50==1 & nhefs.nd$sex==0 & nhefs.nd$race==0,])/nrow(nhefs.nd)
+nrow(nhefs.nd[nhefs.nd$age50==0 & nhefs.nd$sex==1 & nhefs.nd$race==0,])/nrow(nhefs.nd)
+nrow(nhefs.nd[nhefs.nd$age50==0 & nhefs.nd$sex==0 & nhefs.nd$race==1,])/nrow(nhefs.nd)
 nrow(nhefs.nd$qsmk[nhefs.nd$age50==0 & nhefs.nd$sex==0 & nhefs.nd$race==0])
 
 summary(nhefs.nd$death[nhefs.nd$age50==0 & nhefs.nd$sex==0 & nhefs.nd$race==0 & nhefs.nd$qsmk==0])
@@ -42,3 +47,68 @@ summary(nhefs.nd$death[nhefs.nd$age50==0 & nhefs.nd$sex==0 & nhefs.nd$race==0 & 
 # summary(nhefs.nd$qsmk[nhefs.nd$age50==0 & nhefs.nd$sex==0 & nhefs.nd$race==1])
 summary(nhefs.nd$death[nhefs.nd$age50==0 & nhefs.nd$sex==0 & nhefs.nd$race==1 & nhefs.nd$qsmk==0])
 summary(nhefs.nd$death[nhefs.nd$age50==0 & nhefs.nd$sex==0 & nhefs.nd$race==1 & nhefs.nd$qsmk==1])
+
+###########
+
+
+# analysis with models: 2 confounders 
+condfit.3 <- glm(death~qsmk*sex*age50*race, data=nhefs.nd,family=binomial(link="logit"))
+summary(condfit.3)
+
+predict(condfit.3, data.frame(cbind(qsmk=0, sex=0, age50=0, race=0)))
+predict(condfit.3, data.frame(cbind(qsmk=0, sex=1, age50=0,race=0)))
+predict(condfit.3, data.frame(cbind(qsmk=0, sex=0, age50=1,race=0)))
+predict(condfit.3, data.frame(cbind(qsmk=0, sex=1, age50=1,race=0)))
+predict(condfit.3, data.frame(cbind(qsmk=1, sex=0, age50=0,race=0)))
+predict(condfit.3, data.frame(cbind(qsmk=1, sex=1, age50=0,race=0)))
+predict(condfit.3, data.frame(cbind(qsmk=1, sex=0, age50=1,race=0)))
+predict(condfit.3, data.frame(cbind(qsmk=1, sex=1, age50=1,race=0)))
+predict(condfit.3, data.frame(cbind(qsmk=0, sex=0, age50=0, race=1)))
+predict(condfit.3, data.frame(cbind(qsmk=0, sex=1, age50=0,race=1)))
+predict(condfit.3, data.frame(cbind(qsmk=0, sex=0, age50=1,race=1)))
+predict(condfit.3, data.frame(cbind(qsmk=0, sex=1, age50=1,race=1)))
+predict(condfit.3, data.frame(cbind(qsmk=1, sex=0, age50=0,race=1)))
+predict(condfit.3, data.frame(cbind(qsmk=1, sex=1, age50=0,race=1)))
+predict(condfit.3, data.frame(cbind(qsmk=1, sex=0, age50=1,race=1)))
+predict(condfit.3, data.frame(cbind(qsmk=1, sex=1, age50=1,race=1)))
+
+##################################################################
+# Standardization by multiple confounders using an outcome model #
+##################################################################
+
+# create a dataset with 3 copies of each subject
+nhefs$interv <- -1 # 1st copy: equal to original one
+
+interv0 <- nhefs # 2nd copy: treatment set to 0, outcome to missing
+interv0$interv <- 0
+interv0$qsmk <- 0
+interv0$death <- NA
+
+interv1 <- nhefs # 3rd copy: treatment set to 1, outcome to missing
+interv1$interv <- 1
+interv1$qsmk <- 1
+interv1$death <- NA
+
+onesample <- rbind(nhefs, interv0, interv1) # combining datasets
+
+# linear model to estimate mean outcome conditional on treatment and confounders
+# parameters are estimated using original observations only (nhefs)
+# parameter estimates are used to predict mean outcome for observations with 
+# treatment set to 0 (interv=0) and to 1 (interv=1)
+
+std <- glm(death ~ qsmk + sex + race + age, data=onesample,family=binomial(link="logit") )
+summary(std)   
+onesample$predicted_logP <- predict(std, onesample)
+
+
+onesample$predicted_logP
+onesample$predicted_P <- exp(onesample$predicted_logP)
+onesample$predicted_P 
+
+# estimate mean outcome in each of the groups interv=0, and interv=1
+# this mean outcome is a weighted average of the mean outcomes in each combination 
+# of values of treatment and confounders, that is, the standardized outcome
+mean(onesample[which(onesample$interv==-1),]$predicted_P)
+mean(onesample[which(onesample$interv==0),]$predicted_P)
+mean(onesample[which(onesample$interv==1),]$predicted_P)
+mean(onesample[which(onesample$interv==1),]$predicted_P)-mean(onesample[which(onesample$interv==0),]$predicted_P)
