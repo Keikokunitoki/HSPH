@@ -40,14 +40,24 @@ nrow(nhefs.nd[nhefs.nd$age50==0 & nhefs.nd$sex==1 & nhefs.nd$race==0,])/nrow(nhe
 nrow(nhefs.nd[nhefs.nd$age50==0 & nhefs.nd$sex==0 & nhefs.nd$race==1,])/nrow(nhefs.nd)
 nrow(nhefs.nd$qsmk[nhefs.nd$age50==0 & nhefs.nd$sex==0 & nhefs.nd$race==0])
 
-summary(nhefs.nd$death[nhefs.nd$age50==0 & nhefs.nd$sex==0 & nhefs.nd$race==0 & nhefs.nd$qsmk==0])
-summary(nhefs.nd$death[nhefs.nd$age50==0 & nhefs.nd$sex==0 & nhefs.nd$race==0 & nhefs.nd$qsmk==0])
+#A=1
 summary(nhefs.nd$death[nhefs.nd$age50==0 & nhefs.nd$sex==0 & nhefs.nd$race==0 & nhefs.nd$qsmk==1])
-
-# summary(nhefs.nd$qsmk[nhefs.nd$age50==0 & nhefs.nd$sex==0 & nhefs.nd$race==1])
-summary(nhefs.nd$death[nhefs.nd$age50==0 & nhefs.nd$sex==0 & nhefs.nd$race==1 & nhefs.nd$qsmk==0])
 summary(nhefs.nd$death[nhefs.nd$age50==0 & nhefs.nd$sex==0 & nhefs.nd$race==1 & nhefs.nd$qsmk==1])
-
+summary(nhefs.nd$death[nhefs.nd$age50==0 & nhefs.nd$sex==1 & nhefs.nd$race==0 & nhefs.nd$qsmk==1])
+summary(nhefs.nd$death[nhefs.nd$age50==0 & nhefs.nd$sex==1 & nhefs.nd$race==1 & nhefs.nd$qsmk==1])
+summary(nhefs.nd$death[nhefs.nd$age50==1 & nhefs.nd$sex==0 & nhefs.nd$race==0 & nhefs.nd$qsmk==1])
+summary(nhefs.nd$death[nhefs.nd$age50==1 & nhefs.nd$sex==0 & nhefs.nd$race==1 & nhefs.nd$qsmk==1])
+summary(nhefs.nd$death[nhefs.nd$age50==1 & nhefs.nd$sex==1 & nhefs.nd$race==0 & nhefs.nd$qsmk==1])
+summary(nhefs.nd$death[nhefs.nd$age50==1 & nhefs.nd$sex==1 & nhefs.nd$race==1 & nhefs.nd$qsmk==1])
+#A=0
+summary(nhefs.nd$death[nhefs.nd$age50==0 & nhefs.nd$sex==0 & nhefs.nd$race==0 & nhefs.nd$qsmk==0])
+summary(nhefs.nd$death[nhefs.nd$age50==0 & nhefs.nd$sex==0 & nhefs.nd$race==1 & nhefs.nd$qsmk==0])
+summary(nhefs.nd$death[nhefs.nd$age50==0 & nhefs.nd$sex==1 & nhefs.nd$race==0 & nhefs.nd$qsmk==0])
+summary(nhefs.nd$death[nhefs.nd$age50==0 & nhefs.nd$sex==1 & nhefs.nd$race==1 & nhefs.nd$qsmk==0])
+summary(nhefs.nd$death[nhefs.nd$age50==1 & nhefs.nd$sex==0 & nhefs.nd$race==0 & nhefs.nd$qsmk==0])
+summary(nhefs.nd$death[nhefs.nd$age50==1 & nhefs.nd$sex==0 & nhefs.nd$race==1 & nhefs.nd$qsmk==0])
+summary(nhefs.nd$death[nhefs.nd$age50==1 & nhefs.nd$sex==1 & nhefs.nd$race==0 & nhefs.nd$qsmk==0])
+summary(nhefs.nd$death[nhefs.nd$age50==1 & nhefs.nd$sex==1 & nhefs.nd$race==1 & nhefs.nd$qsmk==0])
 ###########
 
 
@@ -55,23 +65,24 @@ summary(nhefs.nd$death[nhefs.nd$age50==0 & nhefs.nd$sex==0 & nhefs.nd$race==1 & 
 condfit.3 <- glm(death~qsmk*sex*age50*race, data=nhefs.nd,family=binomial(link="logit"))
 summary(condfit.3)
 
-predict(condfit.3, data.frame(cbind(qsmk=0, sex=0, age50=0, race=0)))
-predict(condfit.3, data.frame(cbind(qsmk=0, sex=1, age50=0,race=0)))
-predict(condfit.3, data.frame(cbind(qsmk=0, sex=0, age50=1,race=0)))
-predict(condfit.3, data.frame(cbind(qsmk=0, sex=1, age50=1,race=0)))
+#A=1
 predict(condfit.3, data.frame(cbind(qsmk=1, sex=0, age50=0,race=0)))
-predict(condfit.3, data.frame(cbind(qsmk=1, sex=1, age50=0,race=0)))
-predict(condfit.3, data.frame(cbind(qsmk=1, sex=0, age50=1,race=0)))
-predict(condfit.3, data.frame(cbind(qsmk=1, sex=1, age50=1,race=0)))
-predict(condfit.3, data.frame(cbind(qsmk=0, sex=0, age50=0, race=1)))
-predict(condfit.3, data.frame(cbind(qsmk=0, sex=1, age50=0,race=1)))
-predict(condfit.3, data.frame(cbind(qsmk=0, sex=0, age50=1,race=1)))
-predict(condfit.3, data.frame(cbind(qsmk=0, sex=1, age50=1,race=1)))
 predict(condfit.3, data.frame(cbind(qsmk=1, sex=0, age50=0,race=1)))
+predict(condfit.3, data.frame(cbind(qsmk=1, sex=1, age50=0,race=0)))
 predict(condfit.3, data.frame(cbind(qsmk=1, sex=1, age50=0,race=1)))
+predict(condfit.3, data.frame(cbind(qsmk=1, sex=0, age50=1,race=0)))
 predict(condfit.3, data.frame(cbind(qsmk=1, sex=0, age50=1,race=1)))
+predict(condfit.3, data.frame(cbind(qsmk=1, sex=1, age50=1,race=0)))
 predict(condfit.3, data.frame(cbind(qsmk=1, sex=1, age50=1,race=1)))
-
+#A=0
+predict(condfit.3, data.frame(cbind(qsmk=0, sex=0, age50=0, race=0)))
+predict(condfit.3, data.frame(cbind(qsmk=0, sex=0, age50=0, race=1)))
+predict(condfit.3, data.frame(cbind(qsmk=0, sex=1, age50=0,race=0)))
+predict(condfit.3, data.frame(cbind(qsmk=0, sex=1, age50=0,race=1)))
+predict(condfit.3, data.frame(cbind(qsmk=0, sex=0, age50=1,race=0)))
+predict(condfit.3, data.frame(cbind(qsmk=0, sex=0, age50=1,race=1)))
+predict(condfit.3, data.frame(cbind(qsmk=0, sex=1, age50=1,race=0)))
+predict(condfit.3, data.frame(cbind(qsmk=0, sex=1, age50=1,race=1)))
 ##################################################################
 # Standardization by multiple confounders using an outcome model #
 ##################################################################
