@@ -1,5 +1,5 @@
 #Change your working directory to where tlc.txt is on your laptop/computer
-setwd("C:/Users/Daniel Li/Desktop/Spring 2020/BST 226 - Longitudinal TA/Labs/Lab 1")
+setwd("C:/Users/keiko/Dropbox/2020/spring/BST226/")
 
 #Install packages if needed
 install.packages("ggplot2")
