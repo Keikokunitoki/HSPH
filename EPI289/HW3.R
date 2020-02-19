@@ -40,16 +40,16 @@ table(nhefs.nmv$age[nhefs.nmv$race == 0 & nhefs.nmv$sex == 1],
 
 #### msm ###
 fit <- glm(qsmk ~ sex + race + age + I(age*age), family=binomial(),
-           data=nhefs.nmv)
+           data=nhefs)
 summary(fit)
-nhefs.nmv$p.qsmk <- predict(fit, nhefs.nmv, type="response")
+nhefs$p.qsmk <- predict(fit, nhefs, type="response")
 
-nhefs.nmv$w <- ifelse(nhefs.nmv$qsmk==1, 1/nhefs.nmv$p.qsmk, 1/(1-nhefs.nmv$p.qsmk))
-summary(nhefs.nmv$w)
+nhefs$w <- ifelse(nhefs$qsmk==1, 1/nhefs$p.qsmk, 1/(1-nhefs$p.qsmk))
+summary(nhefs$w)
 
 # marginal structural model with conservative 95% CI
 library("geepack")
-msm.death <- geeglm(death ~ qsmk, data=nhefs.nmv, weights=w, id=seqn,
+msm.death <- geeglm(death ~ qsmk, data=nhefs, weights=w, id=seqn,
                     corstr="independence", family=binomial)
 summary(msm.death)
 
