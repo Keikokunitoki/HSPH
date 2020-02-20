@@ -106,3 +106,4 @@ anova(model)
 Sigma <- vcov(model)
 chi2_stat <- t(coef(model)[-1])%*%solve(Sigma[-1,-1])%*%(coef(model)[-1])
 pchisq(chi2_stat, df = 3, lower.tail = FALSE)
+
