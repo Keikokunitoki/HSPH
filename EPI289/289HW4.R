@@ -152,6 +152,8 @@ mean(onesample[which(onesample$interv==-1),]$predicted_meanY)
 mean(onesample[which(onesample$interv==0),]$predicted_meanY)
 mean(onesample[which(onesample$interv==1),]$predicted_meanY)
 
+a<- mean(onesample[which(onesample$interv==1),]$predicted_meanY)-mean(onesample[which(onesample$interv==0),]$predicted_meanY)
+format(a, nsmall = 4)
 #########
 library("boot")
 standardization <- function(data, indices) {
