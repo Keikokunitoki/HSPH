@@ -21,14 +21,22 @@ summary(nhefs$sw)
 
 # saturated marginal structural model, stabilized weights
 msm.sw <- geeglm(death ~ qsmk, data=nhefs, weights=sw, id=seqn,
+                 corstr="independence", family=binomial(link='logit'))
+summary(msm.sw)
+
+msm.sw <- geeglm(death ~ qsmk, data=nhefs, weights=sw, id=seqn,
                  corstr="independence")
 summary(msm.sw)
+
 
 beta <- coef(msm.sw)
 SE <- coef(summary(msm.sw))[,2]
 lcl <- beta-qnorm(0.975)*SE 
 ucl <- beta+qnorm(0.975)*SE
 cbind(beta, lcl, ucl)
+
+
+expit <- function(x)
 
 #####
 library("boot")
@@ -45,7 +53,7 @@ stabwei <- function(data, indices) {
   summary(numer.fit)
   pn.qsmk <- predict(numer.fit, type = "response")
   
-  nhefs$sw <- ifelse(nhefs$qsmk == 0, ((1-pn.qsmk)/(1-pd.qsmk)),
+  d$sw <- ifelse(nhefs$qsmk == 0, ((1-pn.qsmk)/(1-pd.qsmk)),
                      (pn.qsmk/pd.qsmk))
   summary(d$sw)
   
@@ -59,7 +67,7 @@ stabwei <- function(data, indices) {
 }
 # bootstrap
 results <- boot(data=nhefs, statistic=stabwei, R=1000)
-
+results
 # generating confidence intervals
 se <- sd(results$t[,2])
 mean <- mean(results$t[,2])
@@ -140,8 +148,12 @@ onesample <- rbind(nhefs, interv0, interv1) # combining datasets
 # parameter estimates are used to predict mean outcome for observations with 
 # treatment set to 0 (interv=0) and to 1 (interv=1)
 
-std <- geeglm(wt82_71~qsmk + sex + race + age + smokeintensity, data=onesample, 
-                  weights=sw.c2, id=seqn, corstr="independence")
+#std <- geeglm(wt82_71~qsmk + sex + race + age + smokeintensity , data=onesample, 
+ #                 weights=sw.c2, id=seqn, corstr="independence")
+
+std <- glm(wt82_71~qsmk + sex + race + age +asthma+ smokeintensity +cens, data=onesample)
+
+
 summary(std)   
 onesample$predicted_meanY <- predict(std, onesample)
 
@@ -174,8 +186,7 @@ standardization <- function(data, indices) {
   # parameters are estimated using original observations only (interv= -1)
   # parameter estimates are used to predict mean outcome for observations with set 
   # treatment (interv=0 and interv=1)
-  fit <- geeglm(wt82_71~qsmk + sex + race + age + smokeintensity, data=d.onesample, 
-         weights=sw.c2, id=seqn, corstr="independence")
+  fit <-glm(wt82_71~qsmk + sex + race + age + smokeintensity + asthma +cens, data=d.onesample)
   
   d.onesample$predicted_meanY <- predict(fit, d.onesample)
   
@@ -188,7 +199,7 @@ standardization <- function(data, indices) {
 }
 # bootstrap
 results <- boot(data=nhefs, statistic=standardization, R=1000)
-
+results
 # generating confidence intervals
 se <- c(sd(results$t[,1]), sd(results$t[,2]), 
         sd(results$t[,3]), sd(results$t[,4]))
@@ -197,6 +208,5 @@ mean <- c(mean(results$t[,1]), mean(results$t[,2]),
 ll <- mean - qnorm(0.975)*se
 ul <- mean + qnorm(0.975)*se
 
-bootstrap <- data.frame(cbind(c("Observed", "No Treatment", "Treatment", 
-                                "Treatment - No Treatment"), mean, se, ll, ul))
-bootstrap
+a <-cbind(mean, ll, ul)
+format(a, nsmall = 4)
