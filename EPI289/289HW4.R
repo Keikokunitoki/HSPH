@@ -5,13 +5,13 @@ nhefs <- read_excel("C:/Users/keiko/Dropbox/2020/spring/EPI289/nhefs.xlsx")
 
 # estimation of denominator of treatment weights
 denom.fit <- glm(qsmk ~ sex + race + age  + as.factor(weakheart) + smokeintensity + as.factor(asthma) + as.factor(bronch),
-                  family = binomial(), data = nhefs)
+                  family = binomial(link=logit), data = nhefs)
 summary(denom.fit)
 
 pd.qsmk <- predict(denom.fit, type = "response")
 
 # estimation of numerator of treatment weights
-numer.fit <- glm(qsmk~1, family = binomial(), data = nhefs)
+numer.fit <- glm(qsmk~1, family = binomial(link=logit), data = nhefs)
 summary(numer.fit)
 pn.qsmk <- predict(numer.fit, type = "response")
 
@@ -27,6 +27,7 @@ summary(msm.sw)
 msm.sw <- geeglm(death ~ qsmk, data=nhefs, weights=sw, id=seqn,
                  corstr="independence")
 summary(msm.sw)
+
 
 
 beta <- coef(msm.sw)
@@ -46,19 +47,19 @@ stabwei <- function(data, indices) {
                    family = binomial(), data = d)
   summary(denom.fit)
   
-  pd.qsmk <- predict(denom.fit, type = "response")
+  d$pd.qsmk <- predict(denom.fit,d, type = "response")
   
   # estimation of numerator of treatment weights
   numer.fit <- glm(qsmk~1, family = binomial(), data = d)
   summary(numer.fit)
-  pn.qsmk <- predict(numer.fit, type = "response")
+  d$pn.qsmk <- predict(numer.fit,d, type = "response")
   
-  d$sw <- ifelse(nhefs$qsmk == 0, ((1-pn.qsmk)/(1-pd.qsmk)),
+  d$w <- ifelse(nhefs$qsmk == 0, ((1-pn.qsmk)/(1-pd.qsmk)),
                      (pn.qsmk/pd.qsmk))
   summary(d$sw)
   
   # saturated marginal structural model, stabilized weights
-  msm.sw <- geeglm(death ~ qsmk, data=d, weights=sw, id=seqn,
+  msm.sw <- geeglm(death ~ qsmk, data=d, weights=w, id=seqn,
                    corstr="independence")
   
 
@@ -71,8 +72,8 @@ results
 # generating confidence intervals
 se <- sd(results$t[,2])
 mean <- mean(results$t[,2])
-ll <- mean - qnorm(0.975)*se
-ul <- mean + qnorm(0.975)*se
+ll <- exp(log(mean) - qnorm(0.975)*se)
+ul <- exp(log(mean) + qnorm(0.975)*se)
 
 bootstrap <- data.frame( mean, se, ll, ul)
 bootstrap
@@ -84,26 +85,26 @@ nhefs$cens <- ifelse(is.na(nhefs$wt82), 1, 0)
 
 # estimation of denominator of treatment weights
 denom.fit2 <- glm(qsmk ~ sex + race + age + smokeintensity , 
-                 family = binomial(), data = nhefs)
+                 family = binomial(link='logit'), data = nhefs)
 summary(denom.fit2)
 
 pd2.qsmk <- predict(denom.fit2, type = "response")
 
 # estimation of numerator of treatment weights
-numer.fit2 <- glm(qsmk~1, family = binomial(), data = nhefs)
+numer.fit2 <- glm(qsmk~1, family = binomial(link='logit'), data = nhefs)
 summary(numer.fit2)
 pn2.qsmk <- predict(numer.fit2, type = "response")
 
 
 # estimation of denominator of censoring weights
 denom.cens2 <- glm(cens ~ qsmk + sex + race + age + asthma , 
-                  family = binomial(), data = nhefs)
+                  family = binomial(link='logit'), data = nhefs)
 summary(denom.cens2)
 
 pd2.cens <- 1-predict(denom.cens2, type = "response")
 
 # estimation of numerator of censoring weights
-numer.cens2 <- glm(cens~qsmk, family = binomial(), data = nhefs)
+numer.cens2 <- glm(cens~qsmk, family = binomial(link='logit'), data = nhefs)
 summary(numer.cens2)
 pn2.cens <- 1-predict(numer.cens2, type = "response")
 
@@ -153,9 +154,11 @@ onesample <- rbind(nhefs, interv0, interv1) # combining datasets
 
 std <- glm(wt82_71~qsmk + sex + race + age +asthma+ smokeintensity +cens, data=onesample)
 
+std <- glm(wt82_71~qsmk + sex + race + age +asthma+ smokeintensity , data=onesample)
+#in this model, those who censored are automatically removed from the analysis
 
 summary(std)   
-onesample$predicted_meanY <- predict(std, onesample)
+onesample$predicted_meanY <- predict(std, onesample)# predicting the value even if the individual censored
 
 # estimate mean outcome in each of the groups interv=0, and interv=1
 # this mean outcome is a weighted average of the mean outcomes in each combination 
