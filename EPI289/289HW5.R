@@ -48,6 +48,9 @@ model2 <- tsls(wt82_71 ~ qsmk + sex + race + age + smokeintensity + smokeyrs +
                  as.factor(active) + wt71, data = nhefs.iv)
 summary(model2)
 
+###################################
+###for HW
+
 ####test censor
 
 nhefs.iv$cens <- ifelse(is.na(nhefs.iv$wt82_71), 1, 0)
@@ -63,5 +66,18 @@ nhefs.iv$w.c <- 1/pd.cens
 
 model3 <- tsls(wt82_71 ~ qsmk ,
                ~ highprice ,weights=w.c,  data = nhefs.iv)
-summary(model3)
+summary(model3)  #stand error is not robust, to see correct CI, we have to do bootstrapping
 confint(model3)
+
+#in stabilised weighting, there are bias (see DAG)
+
+###manual calculation
+##we have to limit the population to those who complete the study
+nhefs.iv2 <- nhefs.iv[which(nhefs.iv$cens!=1),]
+
+YZ1<- weighted.mean(nhefs.iv2$wt82_71[nhefs.iv2$highprice ==1],nhefs.iv2$w.c[nhefs.iv2$highprice==1])
+YZ0<- weighted.mean(nhefs.iv2$wt82_71[nhefs.iv2$highprice ==0],nhefs.iv2$w.c[nhefs.iv2$highprice==0])
+AZ1<- weighted.mean(nhefs.iv2$qsmk[nhefs.iv2$highprice ==1],nhefs.iv2$w.c[nhefs.iv2$highprice==1])
+AZ0<- weighted.mean(nhefs.iv2$qsmk[nhefs.iv2$highprice ==0],nhefs.iv2$w.c[nhefs.iv2$highprice==0])
+meaneffect <- (YZ1-YZ0)/(AZ1-AZ0) 
+meaneffect
